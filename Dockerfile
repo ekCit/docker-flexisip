@@ -1,5 +1,5 @@
 FROM centos:7
-MAINTAINER Ian Blenke <ian@blenke.com>
+MAINTAINER Ian Blenke <ian@blenke.com>, Cathy Lynn <crmrc2014@gmail.com>
 
 ENV VERSION 1.0.8
 
@@ -12,6 +12,10 @@ RUN sed -i -e 's/keepcache=0/keepcache=1/' /etc/yum.conf ; \
     yum -y install epel-release wget net-snmp bc-flexisip bc-sofia-sip ; \
     rpm -Uvh --force /var/cache/yum/x86_64/7/Belledonne/packages/*.rpm ; \
     yum clean all
+
+# Add odbc-MySQL support
+RUN yum -y install unixODBC unixODBC-devel libtool-ltdl libtool-ltdl-devel
+RUN yum -y install mysql-connector-odbc
 
 # Add it to the default path
 ENV PATH=$PATH:/opt/belledonne-communications/bin
@@ -26,9 +30,8 @@ RUN flexisip --dump-default all > /etc/flexisip/flexisip.conf
 RUN mkdir -p ~/.snmp/mibs /etc/snmp ; \
     flexisip --dump-mibs > ~/.snmp/mibs/fleximib.txt
 
-COPY snmpd.conf /etc/snmp/snmpd.conf 
+COPY snmpd.conf /etc/snmp/snmpd.conf
 
 VOLUME /etc/flexisip
 
 CMD flexisip -c /etc/flexisip/flexisip.conf
-
